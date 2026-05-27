@@ -33,17 +33,9 @@ jobs:
 
       - name: Install OpenCV (Windows)
         if: runner.os == 'Windows'
-        run: |
-          curl -L -o opencv.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
-          Start-Process -FilePath .\opencv.exe -ArgumentList "/S", "/D=C:\opencv" -Wait
-          
-          if (-not (Test-Path "C:\opencv\build\OpenCVConfig.cmake")) {
-            throw "OpenCVConfig.cmake not found! Installation may have failed."
-          }
-          
-          echo "OpenCV_DIR=C:\opencv\build" >> $env:GITHUB_ENV
-          echo "C:\opencv\build\x64\vc16\bin" >> $env:GITHUB_PATH
-        shell: pwsh
+        uses: peterjc123/setup-opencv@v2021.05.09
+        with:
+          opencv-version: '4.5.5'
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
@@ -51,7 +43,7 @@ jobs:
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR=$env:OpenCV_DIR -DCMAKE_PREFIX_PATH=$env:OpenCV_DIR
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR=$env:OpenCV_DIR
         shell: pwsh
 
       - name: Build Project
