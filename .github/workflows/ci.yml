@@ -23,7 +23,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake g++ libopencv-dev qt6-base-dev qt6-multimedia-dev
 
-      - name: Install Qt6 (Windows)
+      - name: Install Qt 6.8.0 (Windows)
         if: runner.os == 'Windows'
         uses: jurplel/install-qt-action@v4
         with:
@@ -31,19 +31,37 @@ jobs:
           modules: 'qtmultimedia'
           cache: true
 
-      - name: Install OpenCV (Windows)
+      - name: Install OpenCV 4.10.0 (Windows)
         if: runner.os == 'Windows'
         run: |
-          curl -L -o opencv.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
-          Start-Process -FilePath .\opencv.exe -ArgumentList "/S", "/D=C:\opencv" -Wait
+          Write-Host "Downloading OpenCV 4.10.0..."
+          curl -L -o opencv-setup.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
           
-          if (-not (Test-Path "C:\opencv\build\OpenCVConfig.cmake")) {
-            throw "OpenCVConfig.cmake not found! Installation may have failed."
+          Write-Host "Extracting OpenCV..."
+          7z x opencv-setup.exe -o"C:\opencv" -y
+          
+          Write-Host "Searching for OpenCVConfig.cmake..."
+          $configFile = Get-ChildItem -Path "C:\opencv" -Recurse -Filter "OpenCVConfig.cmake" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $configFile) {
+            Write-Host "Available files in C:\opencv:"
+            Get-ChildItem -Path "C:\opencv" -Recurse | Select-Object -First 20
+            throw "OpenCVConfig.cmake not found!"
           }
           
-          echo "OpenCV_DIR=C:\opencv\build" >> $env:GITHUB_ENV
-          echo "C:\opencv\build\x64\vc16\bin" >> $env:GITHUB_PATH
+          $opencvBuildDir = $configFile.DirectoryName
+          Write-Host "Found OpenCVConfig.cmake at: $opencvBuildDir"
+          
+          echo "OpenCV_DIR=$opencvBuildDir" >> $env:GITHUB_ENV
+          
+          foreach ($vc in @("vc16", "vc17")) {
+            $binPath = "C:\opencv\build\x64\$vc\bin"
+            if (Test-Path $binPath) {
+              echo $binPath >> $env:GITHUB_PATH
+              Write-Host "Added to PATH: $binPath"
+            }
+          }
         shell: pwsh
+        timeout-minutes: 5
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
@@ -51,7 +69,9 @@ jobs:
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR=$env:OpenCV_DIR -DCMAKE_PREFIX_PATH=$env:OpenCV_DIR
+        run: |
+          Write-Host "OpenCV_DIR: $env:OpenCV_DIR"
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR="${env:OpenCV_DIR}"
         shell: pwsh
 
       - name: Build Project
