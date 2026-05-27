@@ -106,7 +106,7 @@ void ATVVideoGenerator::generate() {
 
     try {
         find_vsync();
-        for (int i = 0; i < 13; ++i) {
+        for (int i = 0; i < 225; ++i) {
             if (QThread::currentThread()->isInterruptionRequested()) {
                 writer.release();
                 emit finished();
@@ -117,7 +117,7 @@ void ATVVideoGenerator::generate() {
             cv::Mat cvframe(height, width, CV_8UC1, frame.data());
             writer.write(cvframe);
 
-            int progress = static_cast<int>((i + 1) * 100.0 / 13.0);
+            int progress = static_cast<int>((i + 1) * 100.0 / 225.0);
             emit progressChanged(progress);
         }
         writer.release();

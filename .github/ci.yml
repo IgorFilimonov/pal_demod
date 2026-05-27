@@ -1,0 +1,54 @@
+name: CMake Build CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libopencv-dev qt6-base-dev qt6-multimedia-dev
+
+      - name: Install Qt6 (Windows)
+        if: runner.os == 'Windows'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.0'
+          modules: 'qtmultimedia'
+          cache: true
+
+      - name: Install OpenCV (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          curl -L -o opencv.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
+          7z x opencv.exe -oC:\opencv -y
+          
+          $opencvBuild = (Get-ChildItem -Path C:\opencv -Directory -Recurse -Filter "OpenCVConfig.cmake" | Select-Object -First 1).DirectoryName
+          echo "OPENCV_DIR=$opencvBuild" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR=$env:OPENCV_DIR
+        shell: pwsh
+
+      - name: Build Project
+        run: cmake --build build --parallel
