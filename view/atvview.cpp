@@ -153,7 +153,7 @@ void ATVView::onGenerationFinished() {
     if (m_progressDialog) { m_progressDialog->setValue(100); m_progressDialog->deleteLater(); m_progressDialog = nullptr; }
     QMessageBox::information(this, "Готово", "Видео успешно сгенерировано!");
 
-    QString path("C:/Users/Igor/Documents/repos/areyoureallyfine/output.mp4");
+    QString path("C:/Users/Igor/Documents/repos/areyoureallyfine/output2.mp4");
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
     player->setSource(QUrl::fromLocalFile(path));
