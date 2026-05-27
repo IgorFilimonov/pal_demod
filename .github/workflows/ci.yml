@@ -31,10 +31,19 @@ jobs:
           modules: 'qtmultimedia'
           cache: true
 
-      - name: Install OpenCV
-        uses: cvpkg/opencv-action@v1
-        with:
-          opencv-version: '4.8.0'
+      - name: Install OpenCV (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          curl -L -o opencv.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
+          Start-Process -FilePath .\opencv.exe -ArgumentList "/S", "/D=C:\opencv" -Wait
+          
+          if (-not (Test-Path "C:\opencv\build\OpenCVConfig.cmake")) {
+            throw "OpenCVConfig.cmake not found! Installation may have failed."
+          }
+          
+          echo "OpenCV_DIR=C:\opencv\build" >> $env:GITHUB_ENV
+          echo "C:\opencv\build\x64\vc16\bin" >> $env:GITHUB_PATH
+        shell: pwsh
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
@@ -42,7 +51,8 @@ jobs:
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR="${{ github.workspace }}/opencv/build" -DQt6_DIR="${{ env.Qt6_DIR }}/lib/cmake/Qt6"
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR=$env:OpenCV_DIR -DCMAKE_PREFIX_PATH=$env:OpenCV_DIR
+        shell: pwsh
 
       - name: Build Project
         run: cmake --build build --parallel
