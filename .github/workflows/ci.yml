@@ -34,8 +34,8 @@ jobs:
       - name: Install OpenCV (Windows)
         if: runner.os == 'Windows'
         run: |
-          curl -L -o opencv-setup.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
-          Start-Process -FilePath .\opencv-setup.exe -ArgumentList "/S", "/D=C:\opencv" -Wait
+          curl -L -o opencv.exe https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-windows.exe
+          Start-Process -FilePath .\opencv.exe -ArgumentList "/S", "/D=C:\opencv" -Wait
           
           if (-not (Test-Path "C:\opencv\build\OpenCVConfig.cmake")) {
             throw "OpenCVConfig.cmake not found! Installation may have failed."
