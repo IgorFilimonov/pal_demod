@@ -31,11 +31,10 @@ jobs:
           modules: 'qtmultimedia'
           cache: true
 
-      - name: Install OpenCV (Windows)
-        if: runner.os == 'Windows'
-        uses: peterjc123/setup-opencv@v2021.05.09
+      - name: Install OpenCV
+        uses: cvpkg/opencv-action@v1
         with:
-          opencv-version: '4.5.5'
+          opencv-version: '4.8.0'
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
@@ -43,8 +42,7 @@ jobs:
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR=$env:OpenCV_DIR
-        shell: pwsh
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR="${{ github.workspace }}/opencv/build" -DQt6_DIR="${{ env.Qt6_DIR }}/lib/cmake/Qt6"
 
       - name: Build Project
         run: cmake --build build --parallel
