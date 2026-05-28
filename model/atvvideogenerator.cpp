@@ -45,8 +45,6 @@ void ATVVideoGenerator::getFrame() {
         }
 
         for (size_t j = 0; j < line.size(); ++j) {
-
-
             double sample = line[j];
             if (INVERT_VIDEO) sample = 1.0 - sample;
             if (sample < 0.0) sample = 0.0;
@@ -60,7 +58,7 @@ void ATVVideoGenerator::getFrame() {
         }
     }
 
-    cout << handler.get_index() << endl;
+    //cout << handler.get_index() << endl;
     if (!is_vsync_found) {
         find_vsync();
     }

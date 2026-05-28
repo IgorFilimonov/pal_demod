@@ -66,6 +66,7 @@ jobs:
 
       - name: Install iir1 (Windows)
         if: runner.os == 'Windows'
+        id: vcpkg
         uses: johnwason/vcpkg-action@v8
         with:
           pkgs: iir1
@@ -80,7 +81,23 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           Write-Host "OpenCV_DIR: $env:OpenCV_DIR"
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR="${env:OpenCV_DIR}"  -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=<triplet> -DVCPKG_MANIFEST_MODE=OFF
+
+          $vcpkgArgs = "${{ steps.vcpkg.outputs.vcpkg-cmake-config }}"
+    
+          $vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
+          if (-not $vcpkgRoot) {
+              $vcpkgRoot = "${{ github.workspace }}/vcpkg"
+          }
+          $triplet = "x64-windows-release"
+          $iirDir = "$vcpkgRoot/installed/$triplet/share/iir1"
+          
+          if (-not (Test-Path "$iirDir/iirConfig.cmake")) {
+              $iirDir = "$vcpkgRoot/installed/$triplet/share/iir"
+          }
+          
+          Write-Host "Setting iir_DIR=$iirDir"
+
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR="${env:OpenCV_DIR}" $vcpkgArgs -Diir_DIR="$iirDir" -DVCPKG_MANIFEST_MODE=OFF
         shell: pwsh
 
       - name: Build Project
