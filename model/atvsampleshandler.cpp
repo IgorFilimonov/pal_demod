@@ -2,6 +2,7 @@
 #include "settings.h"
 #include <fstream>
 #include <iostream>
+#include <Iir.h>
 
 using namespace std;
 
@@ -193,12 +194,11 @@ vector<double> ATVSamplesHandler::get_line() {
     vector<Option> options = get_options(start);
 
     if (options.empty()) {
-        int log = static_cast<int>(distance(complex_samples.begin(), start));
         bool new_field = true;
 
         for (int i = 0; i < 2; ++i) {
             options = get_options(start + i * samples_per_line, 2);
-            if (!options.empty() && log != 150805) {
+            if (!options.empty()) {
                 new_field = false;
                 start += i * samples_per_line + options.back().start_index;
                 break;
@@ -217,6 +217,13 @@ vector<double> ATVSamplesHandler::get_line() {
     fir_filter(demodulated_signal);
     normalize(demodulated_signal);
     start += samples_per_line;
+
+    Iir::Butterworth::BandPass<2> bandpass;
+    bandpass.setup(SAMPLE_RATE, options.back().carrier, 4433618.0);
+    for (double& sample : demodulated_signal) {
+        sample = bandpass.filter(sample);
+    }
+
     return demodulated_signal;
 }
 

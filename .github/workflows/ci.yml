@@ -21,7 +21,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake g++ libopencv-dev qt6-base-dev qt6-multimedia-dev
+          sudo apt-get install -y cmake g++ libopencv-dev qt6-base-dev qt6-multimedia-dev iir1-dev
 
       - name: Install Qt 6.8.0 (Windows)
         if: runner.os == 'Windows'

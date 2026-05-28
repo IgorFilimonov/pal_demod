@@ -3,6 +3,7 @@
 #include <iostream>
 #include <QString>
 #include <QThread>
+#include <QDir>
 
 using namespace std;
 
@@ -37,10 +38,6 @@ void ATVVideoGenerator::getFrame() {
 
     for (int i = 0; i < height; i += 2) {
         int current_index = handler.get_index();
-        if (469000 < current_index && current_index < 470000) {
-            cout << "boop" << endl;
-        }
-
         vector<double> line = handler.get_line();
         if (line.empty()) {
             is_vsync_found = true;
@@ -48,6 +45,8 @@ void ATVVideoGenerator::getFrame() {
         }
 
         for (size_t j = 0; j < line.size(); ++j) {
+
+
             double sample = line[j];
             if (INVERT_VIDEO) sample = 1.0 - sample;
             if (sample < 0.0) sample = 0.0;
@@ -94,9 +93,10 @@ void ATVVideoGenerator::getFrame() {
 }
 
 void ATVVideoGenerator::generate() {
-    string filename = "C:/Users/Igor/Documents/repos/areyoureallyfine/output.mp4";
+    QDir filename = QDir::current();
+    filename.cd("../../");
 
-    cv::VideoWriter writer(filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'),
+    cv::VideoWriter writer(filename.filePath("output.mp4").toStdString(), cv::VideoWriter::fourcc('m', 'p', '4', 'v'),
                            FPS, cv::Size(width, height), false);
 
     if (!writer.isOpened()) {

@@ -66,7 +66,7 @@ void ATVSettingsView::updateOkButton() {
     okBtn->setEnabled(!fileLineEdit->text().trimmed().isEmpty());
 }
 
-Settings ATVSettingsView::settings() const {
+Settings ATVSettingsView::getSettings() const {
     return Settings(
         fileLineEdit->text(),
         formatCombo->currentText(),

@@ -19,7 +19,7 @@ public:
     explicit ATVSettingsView(QWidget *parent = nullptr);
     ~ATVSettingsView() override;
 
-    Settings settings() const;
+    Settings getSettings() const;
 
 private:
     void setupUI();

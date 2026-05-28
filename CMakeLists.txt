@@ -8,6 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets)
 find_package(OpenCV REQUIRED)
+find_package(iir)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -28,4 +29,5 @@ target_link_libraries(PALModDemod PRIVATE
     Qt6::Multimedia
     Qt6::MultimediaWidgets
     ${OpenCV_LIBS}
+    iir::iir
 )

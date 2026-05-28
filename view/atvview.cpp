@@ -6,7 +6,6 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QDebug>
-#include <iostream>
 #include <QPointer>
 
 static QString formatTime(qint64 ms) {
@@ -20,14 +19,22 @@ ATVView::ATVView(QWidget *parent)
     : QMainWindow(parent)
     , player(new QMediaPlayer(this))
     , videoWidget(new QVideoWidget(this))
-    , openBtn(new QPushButton("📂 Открыть", this))
-    , playPauseBtn(new QPushButton("▶", this))
-    , stopBtn(new QPushButton("⏹", this))
+    , openBtn(new QPushButton(this))
+    , playPauseBtn(new QPushButton(this))
+    , stopBtn(new QPushButton(this))
     , seekSlider(new QSlider(Qt::Horizontal, this))
     , timeLabel(new QLabel("00:00 / 00:00", this))
 {
     setWindowTitle("PAL Demod");
     resize(900, 600);
+
+    openBtn->setIcon(style()->standardIcon(QStyle::SP_DirOpenIcon));
+
+    playPauseBtn->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    playPauseBtn->setMaximumWidth(60);
+
+    stopBtn->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+    stopBtn->setMaximumWidth(50);
 
     setupUI();
     setupConnections();
@@ -89,7 +96,7 @@ void ATVView::openFile() {
     ATVSettingsView dialog(this);
     if (dialog.exec() != QDialog::Accepted) return;
 
-    Settings settings = dialog.settings();
+    Settings settings = dialog.getSettings();
     if (!settings.isValid()) return;
 
     startGeneration(settings);
@@ -153,7 +160,9 @@ void ATVView::onGenerationFinished() {
     if (m_progressDialog) { m_progressDialog->setValue(100); m_progressDialog->deleteLater(); m_progressDialog = nullptr; }
     QMessageBox::information(this, "Готово", "Видео успешно сгенерировано!");
 
-    QString path("C:/Users/Igor/Documents/repos/areyoureallyfine/output2.mp4");
+    QDir dir = QDir::current();
+    dir.cd("../../");
+    QString path = dir.filePath("output.mp4");
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 2, 0)
     player->setSource(QUrl::fromLocalFile(path));
@@ -198,7 +207,11 @@ void ATVView::updateDuration(qint64 duration) {
 }
 
 void ATVView::updatePlayPauseButton() {
-    playPauseBtn->setText(player->playbackState() == QMediaPlayer::PlayingState ? "⏸" : "▶");
+    if (player->playbackState() == QMediaPlayer::PlayingState) {
+        playPauseBtn->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+    } else {
+        playPauseBtn->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    }
 }
 
 void ATVView::handleError(QMediaPlayer::Error error, const QString &errorString) {
