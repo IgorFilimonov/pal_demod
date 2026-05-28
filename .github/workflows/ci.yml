@@ -69,7 +69,7 @@ jobs:
         uses: johnwason/vcpkg-action@v8
         with:
           pkgs: iir1
-          triplet: x64-windows
+          triplet: x64-windows-release
           token: ${{ github.token }}
 
       - name: Configure CMake (Linux)
