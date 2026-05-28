@@ -64,6 +64,13 @@ jobs:
         shell: pwsh
         timeout-minutes: 5
 
+      - name: Install iir1 (Windows)
+        if: runner.os == 'Windows'
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgArguments: iir1
+          vcpkgTriplet: ${{ matrix.os == 'windows-latest' && 'x64-windows' || 'x64-osx' }}
+
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
@@ -72,7 +79,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           Write-Host "OpenCV_DIR: $env:OpenCV_DIR"
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR="${env:OpenCV_DIR}"
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DOpenCV_DIR="${env:OpenCV_DIR}" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
         shell: pwsh
 
       - name: Build Project
