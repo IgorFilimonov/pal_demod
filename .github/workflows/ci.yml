@@ -66,10 +66,10 @@ jobs:
 
       - name: Install iir1 (Windows)
         if: runner.os == 'Windows'
-        uses: lukka/run-vcpkg@v11
+        uses: johnwason/vcpkg-action@v6
         with:
-          vcpkgArguments: iir1
-          vcpkgTriplet: ${{ matrix.os == 'windows-latest' && 'x64-windows' || 'x64-osx' }}
+          pkgs: iir1
+          triplet: x64-windows
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
