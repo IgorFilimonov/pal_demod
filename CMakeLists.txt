@@ -8,7 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Multimedia MultimediaWidgets)
 find_package(OpenCV REQUIRED)
-find_package(iir)
+find_package(iir CONFIG REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
